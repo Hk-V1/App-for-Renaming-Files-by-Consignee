@@ -31,20 +31,24 @@ def extract_consignee_from_text(text):
     """
     Extract consignee name from text using regex patterns.
     Only extracts the line immediately below "Consignee (Ship to)".
+    Stops at any other field like "Buyer's Order No." or "Dated".
     Returns the extracted name or None if not found.
     """
     if not text:
         return None
     
-    # Primary pattern: Only match "Consignee (Ship to)" specifically
-    # This will capture the content on the next line after the label
-    pattern = r"Consignee\s*\(Ship\s*to\)\s*[:\-]?\s*\n?\s*([^\n\r]+)"
+    # Pattern: Match "Consignee (Ship to)" and capture only the next line
+    # Stop before other fields like "Buyer's Order No.", "Dated", etc.
+    pattern = r"Consignee\s*\(Ship\s*to\)\s*[:\-]?\s*\n?\s*([^\n\r]+?)(?=\s*(?:Buyer'?s?\s*Order|Dated|Order\s*No|Invoice|Date|\n\s*[A-Z][a-z]+:)|\s*$)"
     
-    match = re.search(pattern, text, re.IGNORECASE)
+    match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
     if match:
         consignee = match.group(1).strip()
         # Clean up the consignee name
         consignee = re.sub(r'\s+', ' ', consignee)  # Remove extra spaces
+        # Remove any trailing punctuation or partial field names
+        consignee = re.sub(r'\s*(Buyer.*|Dated.*|Order.*)', '', consignee, flags=re.IGNORECASE)
+        consignee = consignee.strip()
         if len(consignee) > 0 and len(consignee) < 100:  # Reasonable length
             return consignee
     
