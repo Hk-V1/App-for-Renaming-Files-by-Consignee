@@ -30,29 +30,23 @@ except ImportError:
 def extract_consignee_from_text(text):
     """
     Extract consignee name from text using regex patterns.
+    Only extracts the line immediately below "Consignee (Ship to)".
     Returns the extracted name or None if not found.
     """
     if not text:
         return None
     
-    # Multiple patterns to match different formats
-    patterns = [
-        r"Consignee\s*\(Ship\s*to\)\s*[:\-]?\s*([^\n\r]+)",
-        r"Consignee\s*[:\-]?\s*([^\n\r]+)",
-        r"Ship\s*to\s*[:\-]?\s*([^\n\r]+)",
-        r"CONSIGNEE\s*[:\-]?\s*([^\n\r]+)",
-        r"SHIP\s*TO\s*[:\-]?\s*([^\n\r]+)",
-    ]
+    # Primary pattern: Only match "Consignee (Ship to)" specifically
+    # This will capture the content on the next line after the label
+    pattern = r"Consignee\s*\(Ship\s*to\)\s*[:\-]?\s*\n?\s*([^\n\r]+)"
     
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            consignee = match.group(1).strip()
-            # Clean up the consignee name
-            consignee = re.sub(r'\s+', ' ', consignee)  # Remove extra spaces
-            consignee = consignee.split('\n')[0]  # Take only first line
-            if len(consignee) > 0 and len(consignee) < 100:  # Reasonable length
-                return consignee
+    match = re.search(pattern, text, re.IGNORECASE)
+    if match:
+        consignee = match.group(1).strip()
+        # Clean up the consignee name
+        consignee = re.sub(r'\s+', ' ', consignee)  # Remove extra spaces
+        if len(consignee) > 0 and len(consignee) < 100:  # Reasonable length
+            return consignee
     
     return None
 
