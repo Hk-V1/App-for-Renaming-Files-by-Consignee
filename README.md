@@ -1,4 +1,4 @@
-# 📦 Consignee-Based PDF Renaming Tool (Windows App)
+# 📦 Consignee-Based PDF Renaming Tool
 
 ### 🧠 Summary
 A Python-based Windows desktop app that uploads a ZIP of PDFs, extracts each file’s **“Consignee (Ship to)”** name, renames the files accordingly (removing unwanted text like *“Buyer's Order No.”* or *“Dated”*), and exports them as a new ZIP.
